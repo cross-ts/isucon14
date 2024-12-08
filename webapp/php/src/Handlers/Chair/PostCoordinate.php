@@ -46,16 +46,11 @@ class PostCoordinate extends AbstractHttpHandler
         $this->db->beginTransaction();
         try {
             $chairLocationId = new Ulid();
+            $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s.u');
             $stmt = $this->db->prepare(
-                'INSERT INTO chair_locations (id, chair_id, latitude, longitude) VALUES (?, ?, ?, ?)'
+                'INSERT INTO chair_locations (id, chair_id, latitude, longitude, created_at) VALUES (?, ?, ?, ?, ?)'
             );
-            $stmt->execute([$chairLocationId, $chair->id, $req->getLatitude(), $req->getLongitude()]);
-
-            $stmt = $this->db->prepare(
-                'SELECT * FROM chair_locations WHERE id = ?'
-            );
-            $stmt->execute([$chairLocationId]);
-            $chairLocation = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([$chairLocationId, $chair->id, $req->getLatitude(), $req->getLongitude(), $now]);
 
             $stmt = $this->db->prepare(
                 'SELECT * FROM rides WHERE chair_id = ? ORDER BY updated_at DESC LIMIT 1'
@@ -96,7 +91,7 @@ class PostCoordinate extends AbstractHttpHandler
                 }
             }
             $this->db->commit();
-            $unixMilliseconds = \DateTimeImmutable::createFromFormat("Y-m-d H:i:s.u", $chairLocation['created_at'])->format('Uv');
+            $unixMilliseconds = \DateTimeImmutable::createFromFormat("Y-m-d H:i:s.u", $now)->format('Uv');
             return $this->writeJson(
                 $response,
                 new ChairPostCoordinate200Response(['recorded_at' => (int)$unixMilliseconds])
