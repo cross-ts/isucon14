@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Redis;
 use IsuRide\PaymentGateway\PostPayment;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
@@ -24,6 +25,13 @@ return [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
+    },
+    'redis' => function (): Redis {
+        $redis = new Redis();
+        $host = getenv('ISUCON_REDIS_HOST') ?: '127.0.0.1';
+        $port = getenv('ISUCON_REDIS_PORT') ?: 6379;
+        $redis->connect($host, $port);
+        return $redis;
     },
     'logger' => function (): Logger {
         $logger = new Logger('isuride');

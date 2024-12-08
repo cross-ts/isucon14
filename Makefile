@@ -25,7 +25,7 @@ bench:
 
 .PHONY: post-bench
 post-bench:
-	@$(MAKE) logs profile
+	@$(MAKE) logs truncate profile
 
 ##################
 # Logs: Download #
@@ -37,7 +37,6 @@ MYSQL_LOG_FILE := /var/log/mysql/slow.log
 .PHONY: nginx-log
 nginx-log:
 	@$(RSYNC) $(WEBAPP):$(NGINX_LOG_FILE) logs/nginx/$(NOW).jsonl.gz
-	@$(SSH) $(WEBAPP) "sudo truncate --size 0 $(NGINX_LOG_FILE)"
 
 .PHONY: mysql-log
 mysql-log:
@@ -45,6 +44,10 @@ mysql-log:
 	@$(RSYNC) $(DB):$(MYSQL_LOG_FILE).gz ./logs/mysql/$(shell gdate --iso-8601=seconds).log.gz
 	@$(MAKE) slow.jsonl.gz
 	@cp slow.jsonl.gz logs/mysql/$(NOW).jsonl.gz
+
+.PHONY: truncate
+truncate:
+	@$(SSH) $(WEBAPP) "sudo truncate --size 0 $(NGINX_LOG_FILE)"
 	@$(SSH) $(DB) "sudo truncate --size 0 $(MYSQL_LOG_FILE)"
 
 .PHONY: logs

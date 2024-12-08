@@ -116,7 +116,7 @@ class GetNearbyChairs extends AbstractHttpHandler
 
                 // 最新の位置情報を取得
                 $stmt = $this->db->prepare(
-                    'SELECT * FROM chair_locations WHERE chair_id = ? ORDER BY created_at DESC LIMIT 1'
+                    'SELECT * FROM chair_locations WHERE chair_id = ? ORDER BY id DESC LIMIT 1'
                 );
                 $stmt->execute([$chair->id]);
                 $chairLocationResult = $stmt->fetch(PDO::FETCH_ASSOC);
