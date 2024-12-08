@@ -13,7 +13,7 @@ init:
 SSH := ssh -F $(CURDIR)/.ssh/config
 RSYNC := rsync -e "$(SSH)" --rsync-path "sudo rsync"
 WEBAPP := isucon1
-DB := isucon1
+DB := isucon3
 
 .PHONY: deploy
 deploy:

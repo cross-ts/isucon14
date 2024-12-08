@@ -1,8 +1,17 @@
 - name: Ddeploy webapp
   become: false
   synchronize:
-    src: "{{ playbook_dir }}/../webapp/php"
-    dest: "/home/{{ isucon_user }}/webapp/php"
+    src: "{{ playbook_dir }}/../webapp/php/"
+    dest: "/home/{{ isucon_user }}/webapp/php/"
+    recursive: true
+    use_ssh_args: true
+    delete: false
+
+- name: Deploy sql
+  become: false
+  synchronize:
+    src: "{{ playbook_dir }}/../webapp/sql/"
+    dest: "/home/{{ isucon_user }}/webapp/sql/"
     recursive: true
     use_ssh_args: true
     delete: false

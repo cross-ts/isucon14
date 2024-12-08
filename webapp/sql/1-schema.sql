@@ -93,6 +93,7 @@ CREATE TABLE rides
   PRIMARY KEY (id)
 )
   COMMENT = 'ライド情報テーブル';
+alter table rides add index i1(chair_id, updated_at desc);
 
 DROP TABLE IF EXISTS ride_statuses;
 CREATE TABLE ride_statuses
@@ -106,6 +107,7 @@ CREATE TABLE ride_statuses
   PRIMARY KEY (id)
 )
   COMMENT = 'ライドステータスの変更履歴テーブル';
+alter table ride_statuses add index i1(ride_id, chair_sent_at, created_at desc);
 
 DROP TABLE IF EXISTS owners;
 CREATE TABLE owners
