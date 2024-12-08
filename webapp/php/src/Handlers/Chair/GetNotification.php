@@ -14,6 +14,7 @@ use IsuRide\Model\User;
 use IsuRide\Response\ErrorResponse;
 use PDO;
 use PDOException;
+use Redis;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -21,6 +22,7 @@ class GetNotification extends AbstractHttpHandler
 {
     public function __construct(
         private readonly PDO $db,
+        private readonly Redis $redis,
     ) {
     }
 
