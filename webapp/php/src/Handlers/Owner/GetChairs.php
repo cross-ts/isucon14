@@ -39,6 +39,7 @@ class GetChairs extends AbstractHttpHandler
     ): ResponseInterface {
         $owner = $request->getAttribute('owner');
         assert($owner instanceof Owner);
+
         $cached = $this->redis->get('owner_chairs:' . $owner->id);
         if ($cached !== false) {
             $_ownerChairs = json_decode($cached, true);
@@ -49,37 +50,41 @@ class GetChairs extends AbstractHttpHandler
         /** @var ChairWithDetail[] $chairs */
         $chairs = [];
         try {
-            $stmt = $this->db->prepare(
-                <<<SQL
-SELECT id,
-       owner_id,
-       name,
-       access_token,
-       model,
-       is_active,
-       created_at,
-       updated_at,
-       IFNULL(total_distance, 0) AS total_distance,
-       total_distance_updated_at
-FROM chairs
-       LEFT JOIN (
-           SELECT chair_id,
-                  SUM(IFNULL(distance, 0)) AS total_distance,
-                  MAX(created_at) AS total_distance_updated_at
-           FROM (
-               SELECT chair_id,
-                      created_at,
-                      ABS(latitude - LAG(latitude) OVER (PARTITION BY chair_id ORDER BY created_at)) +
-                      ABS(longitude - LAG(longitude) OVER (PARTITION BY chair_id ORDER BY created_at)) AS distance
-               FROM chair_locations
-           ) tmp
-           GROUP BY chair_id
-       ) distance_table ON distance_table.chair_id = chairs.id
-WHERE owner_id = ?
-SQL
-            );
+            $ownerChairs = [];
+            $stmt = $this->db->prepare("SELECT * FROM chairs WHERE owner_id = ?");
             $stmt->execute([$owner->id]);
-            $chairs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $ownerChairs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $placeHolders = implode(',', array_fill(0, count($ownerChairs), '?'));
+            $stmt = $this->db->prepare("SELECT * FROM chair_locations WHERE chair_id IN ($placeHolders) ORDER BY created_at");
+            $stmt->execute(array_column($ownerChairs, 'id'));
+            $locations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $locationColumns = [];
+            $prevLocations = [];
+            foreach ($locations as $location) {
+                $chairId = $location['chair_id'];
+                $locationColumns[$chairId]['total_distance'] ??= 0;
+                $locationColumns[$chairId]['total_distance_updated_at'] ??= null;
+
+                if (isset($prevLocations[$chairId])) {
+                    $locationColumns[$chairId]['total_distance'] += abs($location['latitude'] - $prevLocations[$chairId]['latitude']);
+                    $locationColumns[$chairId]['total_distance'] += abs($location['longitude'] - $prevLocations[$chairId]['longitude']);
+                }
+
+                $locationColumns[$chairId]['total_distance_updated_at'] = $location['created_at'];
+                $prevLocations[$chairId] = [
+                    'latitude' => $location['latitude'],
+                    'longitude' => $location['longitude']
+                ];
+            }
+
+            foreach ($ownerChairs as $ownerChair) {
+                $additionalColumn = $locationColumns[$ownerChair['id']] ?? [];
+                $ownerChair['total_distance'] = $additionalColumn['total_distance'] ?? 0;
+                $ownerChair['total_distance_updated_at'] = $additionalColumn['total_distance_updated_at'] ?? null;
+                $chairs[] = $ownerChair;
+            }
         } catch (PDOException $e) {
             return (new ErrorResponse())->write(
                 $response,
