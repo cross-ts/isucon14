@@ -35,6 +35,7 @@ CREATE TABLE chairs
   PRIMARY KEY (id)
 )
   COMMENT = '椅子情報テーブル';
+alter table chairs add index i1(access_token);
 
 DROP TABLE IF EXISTS chair_locations;
 CREATE TABLE chair_locations
@@ -67,6 +68,7 @@ CREATE TABLE users
   UNIQUE (invitation_code)
 )
   COMMENT = '利用者情報テーブル';
+alter table users add index i1(access_token);
 
 DROP TABLE IF EXISTS payment_tokens;
 CREATE TABLE payment_tokens
@@ -126,6 +128,7 @@ CREATE TABLE owners
   UNIQUE (chair_register_token)
 )
   COMMENT = '椅子のオーナー情報テーブル';
+alter table owners add index i1(access_token);
 
 DROP TABLE IF EXISTS coupons;
 CREATE TABLE coupons
