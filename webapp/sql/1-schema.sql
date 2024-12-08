@@ -48,6 +48,7 @@ CREATE TABLE chair_locations
   PRIMARY KEY (id)
 )
   COMMENT = '椅子の現在位置情報テーブル';
+-- alter table chair_locations add column location POINT GENERATED ALWAYS AS (ST_PointFromText(CONCAT("POINT(", latitude, " ", longitude, ")"))) STORED;
 alter table chair_locations add index i1(chair_id, created_at);
 
 DROP TABLE IF EXISTS users;
@@ -96,6 +97,8 @@ CREATE TABLE rides
   PRIMARY KEY (id)
 )
   COMMENT = 'ライド情報テーブル';
+-- alter table rides add column pickup_location POINT GENERATED ALWAYS AS (ST_PointFromText(CONCAT("POINT(", pickup_latitude, " ", pickup_longitude, ")"))) STORED;
+-- alter table rides add column destination_location POINT GENERATED ALWAYS AS (ST_PointFromText(CONCAT("POINT(", destination_latitude, " ", destination_longitude, ")"))) STORED;
 alter table rides add index i1(chair_id, updated_at desc);
 alter table rides add index i2(user_id, created_at desc);
 
