@@ -95,10 +95,10 @@ class PostCoordinate extends AbstractHttpHandler
             $this->db->commit();
             $unixMilliseconds = \DateTimeImmutable::createFromFormat("Y-m-d H:i:s.u", $now)->format('Uv');
 
-            $this->redis->hSet("chair_location", $chair->id, json_encode([
+            $this->redis->hSet("chair_location", $chair->id, [
                 'latitude' => $req->getLatitude(),
                 'longitude' => $req->getLongitude(),
-            ]));
+            ]);
 
             return $this->writeJson(
                 $response,

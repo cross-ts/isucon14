@@ -103,7 +103,7 @@ class GetNotification extends AbstractHttpHandler
                             ),
                             'status' => $status
                         ]),
-                    'retry_after_ms' => 30
+                    'retry_after_ms' => 1000
                 ])
             );
         } catch (PDOException $e) {
