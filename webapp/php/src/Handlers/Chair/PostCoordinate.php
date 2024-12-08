@@ -11,6 +11,7 @@ use IsuRide\Handlers\AbstractHttpHandler;
 use IsuRide\Model\ChairPostCoordinate200Response;
 use IsuRide\Model\ChairPostCoordinateRequest;
 use IsuRide\Response\ErrorResponse;
+use Redis;
 use PDO;
 use PDOException;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +23,7 @@ class PostCoordinate extends AbstractHttpHandler
 {
     public function __construct(
         private readonly PDO $db,
+        private readonly Redis $redis,
     ) {
     }
 

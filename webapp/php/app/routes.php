@@ -18,6 +18,9 @@ return function (App $app, array $config) {
     /** @var PDO $database */
     $database = $config['database']();
 
+    /** @var Redis $redis */
+    $redis = $config['redis']();
+
     $app->options('/{routes:.*}', function (Request $request, Response $response) {
         // CORS Pre-Flight OPTIONS Request Handler
         return $response;
@@ -46,9 +49,9 @@ return function (App $app, array $config) {
     );
     // chair handlers
     $app->post('/api/chair/chairs', new Handlers\Chair\PostChairs($database));
-    $app->group('/api/chair', function ($app) use ($database) {
+    $app->group('/api/chair', function ($app) use ($database, $redis) {
         $app->post('/activity', new Handlers\Chair\PostActivity($database));
-        $app->post('/coordinate', new Handlers\Chair\PostCoordinate($database));
+        $app->post('/coordinate', new Handlers\Chair\PostCoordinate($database, $redis));
         $app->get('/notification', new Handlers\Chair\GetNotification($database));
         $app->post('/rides/{ride_id}/status', new Handlers\Chair\PostRideStatus($database));
     })->addMiddleware(
