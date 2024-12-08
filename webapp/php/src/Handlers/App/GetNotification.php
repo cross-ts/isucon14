@@ -62,7 +62,7 @@ class GetNotification extends AbstractHttpHandler
                 updatedAt: $result['updated_at']
             );
 
-            $stmt = $this->db->prepare('SELECT * FROM ride_statuses WHERE ride_id = ? AND app_sent_at IS NULL ORDER BY created_at ASC LIMIT 1');
+            $stmt = $this->db->prepare('SELECT * FROM ride_statuses WHERE ride_id = ? AND app_sent_at IS NULL ORDER BY id ASC LIMIT 1');
             $stmt->execute([$ride->id]);
             $yetSentRideStatus = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$yetSentRideStatus) {
