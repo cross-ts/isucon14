@@ -13,6 +13,7 @@ use IsuRide\Model\OwnerGetChairs200ResponseChairsInner;
 use IsuRide\Response\ErrorResponse;
 use PDO;
 use PDOException;
+use Redis;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -20,6 +21,7 @@ class GetChairs extends AbstractHttpHandler
 {
     public function __construct(
         private readonly PDO $db,
+        private readonly Redis $redis,
     ) {
     }
 
@@ -37,6 +39,13 @@ class GetChairs extends AbstractHttpHandler
     ): ResponseInterface {
         $owner = $request->getAttribute('owner');
         assert($owner instanceof Owner);
+        $cached = $this->redis->get('owner_chairs:' . $owner->id);
+        if ($cached !== false) {
+            $_ownerChairs = json_decode($cached, true);
+            $res = new OwnerGetChairs200Response();
+            return $this->writeJson($response, $res->setChairs($_ownerChairs));
+        }
+
         /** @var ChairWithDetail[] $chairs */
         $chairs = [];
         try {
@@ -105,6 +114,7 @@ SQL
             }
             $ownerChairs[] = $ownerChair;
         }
+        $this->redis->set('owner_chairs:' . $owner->id, json_encode($ownerChairs), ['ex' => 2]);
         return $this->writeJson($response, $res->setChairs($ownerChairs));
     }
 }

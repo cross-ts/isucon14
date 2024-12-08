@@ -25,7 +25,7 @@ return function (App $app, array $config) {
         // CORS Pre-Flight OPTIONS Request Handler
         return $response;
     });
-    $app->post('/api/initialize', new Handlers\PostInitialize($database));
+    $app->post('/api/initialize', new Handlers\PostInitialize($database, $redis));
     $app->post('/api/app/users', new Handlers\App\PostUsers($database));
     // app handlers
     $app->group('/api/app', function ($app) use ($database, $paymentGateway) {
@@ -41,9 +41,9 @@ return function (App $app, array $config) {
     );
     // owner handlers
     $app->post('/api/owner/owners', new Handlers\Owner\PostOwners($database));
-    $app->group('/api/owner', function ($app) use ($database) {
+    $app->group('/api/owner', function ($app) use ($database, $redis) {
         $app->get('/sales', new Handlers\Owner\GetSales($database));
-        $app->get('/chairs', new Handlers\Owner\GetChairs($database));
+        $app->get('/chairs', new Handlers\Owner\GetChairs($database, $redis));
     })->addMiddleware(
         new Middlewares\OwnerAuthMiddleware($database, $app->getResponseFactory())
     );

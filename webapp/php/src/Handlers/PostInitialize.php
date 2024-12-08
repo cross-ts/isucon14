@@ -8,6 +8,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use IsuRide\Model\PostInitialize200Response;
 use IsuRide\Model\PostInitializeRequest;
 use IsuRide\Response\ErrorResponse;
+use Redis;
 use PDO;
 use PDOException;
 use Psr\Http\Message\ResponseInterface;
@@ -19,6 +20,7 @@ class PostInitialize extends AbstractHttpHandler
 {
     public function __construct(
         private readonly PDO $db,
+        private readonly Redis $redis,
     ) {
     }
 
@@ -70,6 +72,7 @@ class PostInitialize extends AbstractHttpHandler
                 )
             );
         }
+        $this->redis->flushAll();
         return $this->writeJson($response, new PostInitialize200Response([
             'language' => 'php',
         ]));
