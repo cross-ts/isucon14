@@ -1,15 +1,22 @@
 - name: Ddeploy webapp
   become: false
   synchronize:
-    src: "{{ playbook_dir }}/../webapp/"
-    dest: "/home/{{ isucon_user }}/webapp/"
+    src: "{{ playbook_dir }}/../webapp/php"
+    dest: "/home/{{ isucon_user }}/webapp/php"
     recursive: true
     use_ssh_args: true
     delete: false
-  #notify: restart webapp
 
 #- name: Composer install
 #  become: false
 #  command:
-#    cmd: composer install --no-dev --optimize-autoloader
+#    cmd: /usr/local/bin/composer install --no-dev --optimize-autoloader
 #    chdir: "/home/{{ isucon_user }}/webapp/php"
+
+- name: Deploy env.sh
+  become: false
+  copy:
+    src: "{{ playbook_dir }}/../env.sh"
+    dest: "/home/{{ isucon_user }}/env.sh"
+    mode: 0644
+  notify: restart webapp
