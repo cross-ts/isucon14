@@ -13,6 +13,7 @@ init:
 SSH := ssh -F $(CURDIR)/.ssh/config
 RSYNC := rsync -e "$(SSH)" --rsync-path "sudo rsync"
 WEBAPP := isucon1
+WEBAPP2 := isucon2
 DB := isucon3
 
 .PHONY: deploy
@@ -48,6 +49,7 @@ mysql-log:
 .PHONY: truncate
 truncate:
 	@$(SSH) $(WEBAPP) "sudo truncate --size 0 $(NGINX_LOG_FILE)"
+	@$(SSH) $(WEBAPP2) "sudo truncate --size 0 $(NGINX_LOG_FILE)"
 	@$(SSH) $(DB) "sudo truncate --size 0 $(MYSQL_LOG_FILE)"
 
 .PHONY: logs
