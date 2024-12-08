@@ -1,5 +1,5 @@
 - name: restart webapp
   systemd:
-    name: isuride.php
+    name: isuride-php
     state: restarted
     enabled: true
